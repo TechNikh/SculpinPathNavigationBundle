@@ -61,7 +61,25 @@ class PathNavigationGenerator implements GeneratorInterface
         $post_relative_url = $permalink->relativeUrlPath();
         $post_relative_url = trim($post_relative_url, '/');
 
+        if(!$this->endsWith($post_relative_url, ".md")){
+          continue;
+        }
         $post_relative_url_array = explode('/', $post_relative_url);
+        // Remove first two folders, & last file name
+        unset($post_relative_url_array[0]);
+        unset($post_relative_url_array[1]);
+        array_pop($post_relative_url_array);
+        $directory_relative_url = implode('/', $post_relative_url_array);
+
+        $pathGeneratedSource = $source->duplicate(
+            $source->sourceId().':path='."api/v1/categories/$directory_relative_url/"
+            );
+        $pathGeneratedSource->data()->set('permalink', "api/v1/categories/$directory_relative_url/");
+        $pathGeneratedSource->data()->set('path', "api/v1/categories/$directory_relative_url/");
+
+        $pathGeneratedSource->data()->set('api_posts', $datedPostData[$directory_relative_url]);
+        $generatedSources[] = $pathGeneratedSource;
+        /*$post_relative_url_array = explode('/', $post_relative_url);
         $length = count($post_relative_url_array);
         // 2 to account preceeding path: open-curricula-files/_videos in sculpin_kernel.yml
         $post_relative_url_array = array_splice($post_relative_url_array, 2, $length-3);
@@ -85,9 +103,19 @@ class PathNavigationGenerator implements GeneratorInterface
           $pathGeneratedSource->data()->set('api_posts', $clone_datedPostData['apis']);
           //$generatedPaths[] = "api/v1/categories/$spliced_relative_url/";
           $generatedSources[] = $pathGeneratedSource;
-        }
+        }*/
       }
       return $generatedSources;
+    }
+
+    public function endsWith($haystack, $needle)
+    {
+      $length = strlen($needle);
+      if ($length == 0) {
+        return true;
+      }
+
+      return (substr($haystack, -$length) === $needle);
     }
 
     /**

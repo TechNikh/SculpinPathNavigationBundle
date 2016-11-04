@@ -47,6 +47,30 @@ class PathNavigationProvider implements DataProviderInterface
         $post_relative_url = trim($post_relative_url, '/');
         if($this->endsWith($post_relative_url, ".md")){
           $post_relative_url_array = explode('/', $post_relative_url);
+          $clone_post_relative_url_array_for_directories = $post_relative_url_array;
+          // Remove first two folders, & last file name
+          unset($clone_post_relative_url_array_for_directories[0]);
+          unset($clone_post_relative_url_array_for_directories[1]);
+          array_pop($clone_post_relative_url_array_for_directories);
+          $directory_relative_url = implode('/', $clone_post_relative_url_array_for_directories);
+          $return_item_array = array(
+              "title" => $post->title(),
+              "url" => $post_relative_url,
+              "content" => $post->content(),
+              "tags" => $post->data()->get('tags'),
+          );
+          $thumbnail_urls = $post->data()->get('thumbnail_urls');
+          if(!empty($thumbnail_urls)){
+            $return_item_array["thumbnails"] = $thumbnail_urls;
+          }
+          if($content_type == "videos"){
+            $return_item_array["type"] = 'video';
+            $return_item_array["youtube_id"] = $post->data()->get('youtube_id');
+          }elseif($content_type == "articles"){
+            $return_item_array["type"] = 'article';
+            $return_item_array["article_ref"] = $post->data()->get('article_ref');
+          }
+          $data[$directory_relative_url][] = $return_item_array;
           $length = count($post_relative_url_array);
           // 2 to account preceeding path: open-curricula-files/_videos in sculpin_kernel.yml
           $post_relative_url_array = array_splice($post_relative_url_array, 2, $length-3);
@@ -54,7 +78,7 @@ class PathNavigationProvider implements DataProviderInterface
             $clone_post_relative_url_array = $post_relative_url_array;
             $spliced_arr = array_splice($clone_post_relative_url_array, 0, $i);
             $spliced_relative_url = implode('/', $spliced_arr);
-            $arr[$spliced_relative_url]['posts'][$post_relative_url] = $post;
+            /*$arr[$spliced_relative_url]['posts'][$post_relative_url] = $post;
             $arr[$spliced_relative_url]['apis']['items'][$post_relative_url] = array(
                 "title" => $post->title(),
                 "url" => $post_relative_url,
@@ -69,10 +93,10 @@ class PathNavigationProvider implements DataProviderInterface
               $arr[$spliced_relative_url]['apis']['items'][$post_relative_url]["youtube_id"] = $post->data()->get('youtube_id');
             }elseif($content_type == "articles"){
               $arr[$spliced_relative_url]['apis']['items'][$post_relative_url]["article_ref"] = $post->data()->get('article_ref');
-            }
+            }*/
             $all_paths[$spliced_relative_url][] = $spliced_relative_url;
           }
-          foreach ($arr as $key=>$val) {
+          /*foreach ($arr as $key=>$val) {
             $r = & $data;
             foreach (explode("/", $key) as $key) {
               if (!isset($r[$key])) {
@@ -81,7 +105,7 @@ class PathNavigationProvider implements DataProviderInterface
               $r = & $r[$key];
             }
             $r = $val;
-          }
+          }*/
         }
       }
     }
