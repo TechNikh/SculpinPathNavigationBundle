@@ -56,6 +56,12 @@ class PathNavigationProvider implements DataProviderInterface
           $return_item_array = array(
               "title" => $post->title(),
               "url" => $post_relative_url,
+              "uuid" => $post->data()->get('uuid'),
+              "updated" => $post->data()->get('updated'),
+              "type" => $post->data()->get('type'),
+              "id" => $post->data()->get('id'),
+              "download_url" => $post->data()->get('download_url'),
+              "category_path" => $directory_relative_url,
               "content" => $post->content(),
               "tags" => $post->data()->get('tags'),
           );
@@ -64,11 +70,10 @@ class PathNavigationProvider implements DataProviderInterface
             $return_item_array["thumbnails"] = $thumbnail_urls;
           }
           if($content_type == "videos"){
-            $return_item_array["type"] = 'video';
-            $return_item_array["youtube_id"] = $post->data()->get('youtube_id');
+            $return_item_array["provider"] = $post->data()->get('provider');
+            //$return_item_array["id"] = $post->data()->get('id');
           }elseif($content_type == "articles"){
-            $return_item_array["type"] = 'article';
-            $return_item_array["article_ref"] = $post->data()->get('article_ref');
+            //$return_item_array["id"] = $post->data()->get('id');
           }
           $data[$directory_relative_url][] = $return_item_array;
           $length = count($post_relative_url_array);
